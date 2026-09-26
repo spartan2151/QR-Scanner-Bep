@@ -164,9 +164,9 @@ export default function Home() {
     const provider = getProvider();
     if (!provider) throw new Error("No compatible Web3 wallet detected.");
 
-    const accounts = await provider.request({ method: "eth_requestAccounts" });
+    const accounts = await provider.request({ method: "eth_accounts" });
     if (!Array.isArray(accounts) || typeof accounts[0] !== "string" || !accounts[0]) {
-      throw new Error("No wallet account found.");
+      throw new Error("No connected wallet account found. Connect your wallet in the wallet app and try again.");
     }
 
     if (!await switchToBnb(provider)) return null;
