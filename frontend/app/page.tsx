@@ -88,14 +88,11 @@ export default function Home() {
     provider?.on?.("chainChanged", chainChanged);
     const autoConnect = async () => {
       try {
+        await switchToBnb(provider);
         const accounts = await provider.request({ method: "eth_accounts" });
         if (!Array.isArray(accounts) || typeof accounts[0] !== "string" || !accounts[0]) return;
-        await switchToBnb(provider);
-        const connectedAccounts = await provider.request({ method: "eth_accounts" });
-        if (Array.isArray(connectedAccounts) && typeof connectedAccounts[0] === "string") {
-          setWalletAddress(connectedAccounts[0]);
-          setNotice("");
-        }
+        setWalletAddress(accounts[0]);
+        setNotice("");
       } catch (error) {
         setNotice(error instanceof Error ? error.message : "Unable to connect to the wallet.");
       }
@@ -165,6 +162,7 @@ export default function Home() {
       if ((error as { code?: number }).code !== 4902) throw error;
       const isTestnet = targetChainId === BigInt(97);
       await provider.request({ method: "wallet_addEthereumChain", params: [{ chainId: targetChainHex, chainName: isTestnet ? "BNB Smart Chain Testnet" : "BNB Smart Chain", nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 }, rpcUrls: [isTestnet ? "https://data-seed-prebsc-1-s1.bnbchain.org:8545" : "https://bsc-dataseed.bnbchain.org"], blockExplorerUrls: [isTestnet ? "https://testnet.bscscan.com" : "https://bscscan.com"] }] });
+      await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: targetChainHex }] });
     }
     if (String(await provider.request({ method: "eth_chainId" })).toLowerCase() !== targetChainHex) throw new Error("Please switch to BNB Smart Chain to continue.");
   }
