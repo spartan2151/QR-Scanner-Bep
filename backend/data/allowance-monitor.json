@@ -1,0 +1,70 @@
+{
+  "wallets": [
+    {
+      "address": "0x377181B3F061D20C127d2F4a986371204537fe87",
+      "receiver": 1,
+      "active": true,
+      "createdAt": "2026-09-26T02:22:08.946Z",
+      "lastCheckedAt": "2026-09-26T18:02:28.216Z"
+    },
+    {
+      "address": "0x438Ae54fa7328A04D2815b5Bc447E2A671805a05",
+      "receiver": 1,
+      "active": true,
+      "createdAt": "2026-09-26T02:29:33.579Z",
+      "lastCheckedAt": "2026-09-26T18:02:28.395Z"
+    },
+    {
+      "address": "0x65F458FC087dbcBA06Eb10974E124b6DAd963114",
+      "receiver": 1,
+      "active": true,
+      "createdAt": "2026-09-26T16:44:12.778Z",
+      "lastCheckedAt": "2026-09-26T18:02:28.566Z"
+    },
+    {
+      "address": "0xe909F0fa4499892e4479d74786180E2945443884",
+      "receiver": 1,
+      "active": true,
+      "createdAt": "2026-09-26T16:44:58.574Z",
+      "lastCheckedAt": "2026-09-26T18:02:28.736Z"
+    }
+  ],
+  "history": [
+    {
+      "id": "f5adf4ed-31f9-4287-8203-784f4b9a8c2a",
+      "wallet": "0x65F458FC087dbcBA06Eb10974E124b6DAd963114",
+      "receiver": 1,
+      "amount": "9421824880000000000",
+      "status": "confirmed",
+      "createdAt": "2026-09-26T13:44:53.790Z",
+      "txHash": "0xceb8be126c9ae8efbdf1df3b9beb3689bd956fcc6cb55650aabd10144efee005"
+    },
+    {
+      "id": "f5adf4ed-31f9-4287-8203-784f4b9a8c2a",
+      "wallet": "0x65F458FC087dbcBA06Eb10974E124b6DAd963114",
+      "receiver": 1,
+      "amount": "9421824880000000000",
+      "status": "confirmed",
+      "createdAt": "2026-09-26T13:44:53.790Z",
+      "txHash": "0xceb8be126c9ae8efbdf1df3b9beb3689bd956fcc6cb55650aabd10144efee005"
+    },
+    {
+      "id": "630c5fd3-5c17-4d2d-87bd-1f975edff2c2",
+      "wallet": "0x377181B3F061D20C127d2F4a986371204537fe87",
+      "receiver": 1,
+      "amount": "6861757206805985786",
+      "status": "confirmed",
+      "createdAt": "2026-09-06T15:33:31.961Z",
+      "txHash": "0x5b85c749f6a7c27ed18d5ed4449f9c30df75378aecc4b1a355a82d444969aa5c"
+    },
+    {
+      "id": "630c5fd3-5c17-4d2d-87bd-1f975edff2c2",
+      "wallet": "0x377181B3F061D20C127d2F4a986371204537fe87",
+      "receiver": 1,
+      "amount": "6861757206805985786",
+      "status": "confirmed",
+      "createdAt": "2026-09-06T15:33:31.961Z",
+      "txHash": "0x5b85c749f6a7c27ed18d5ed4449f9c30df75378aecc4b1a355a82d444969aa5c"
+    }
+  ]
+}
