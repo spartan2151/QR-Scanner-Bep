@@ -35,6 +35,7 @@ export default function Home() {
   const [usdtBalance, setUsdtBalance] = useState<{ token: string; usd: string } | null>(null);
   const [balanceUnavailable, setBalanceUnavailable] = useState(false);
   const autoConnectAttempted = useRef(false);
+  const walletUnavailableAlerted = useRef(false);
   const parsedAmount = Number.parseFloat(amountInput) || 0;
   const hasAmount = parsedAmount > 0 || (amountInput !== "0" && amountInput !== "");
 
@@ -53,16 +54,57 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const announced = (event: Event) => { const provider = (event as CustomEvent<Eip6963ProviderDetail>).detail?.provider; if (provider && !walletProvider) setWalletProvider(provider); };
-    const accountsChanged = (...args: unknown[]) => { if (!Array.isArray(args[0]) || !(args[0] as string[]).length) setNotice("Wallet disconnected. Connect again to continue."); };
-    const chainChanged = (...args: unknown[]) => { if (String(args[0]).toLowerCase() !== targetChainHex) setNotice("Please switch to BNB Smart Chain to continue."); };
+    let discoveredProvider = Boolean(window.ethereum);
+    const announced = (event: Event) => {
+      const provider = (event as CustomEvent<Eip6963ProviderDetail>).detail?.provider;
+      if (provider) {
+        discoveredProvider = true;
+        setWalletProvider((current) => current ?? provider);
+      }
+    };
+    if (window.ethereum) setWalletProvider((current) => current ?? window.ethereum);
     window.addEventListener("eip6963:announceProvider", announced);
     window.dispatchEvent(new Event("eip6963:requestProvider"));
+    const unavailableTimer = window.setTimeout(() => {
+      if (!discoveredProvider && !walletUnavailableAlerted.current) {
+        walletUnavailableAlerted.current = true;
+        alert("Please open in Trust Wallet / MetaMask browser");
+      }
+    }, 1000);
+    return () => {
+      window.clearTimeout(unavailableTimer);
+      window.removeEventListener("eip6963:announceProvider", announced);
+    };
+  }, []);
+
+  useEffect(() => {
     const provider = walletProvider ?? window.ethereum;
+    if (!provider || autoConnectAttempted.current) return;
+    autoConnectAttempted.current = true;
+
+    const accountsChanged = (...args: unknown[]) => { if (!Array.isArray(args[0]) || !(args[0] as string[]).length) setNotice("Wallet disconnected. Connect again to continue."); };
+    const chainChanged = (...args: unknown[]) => { if (String(args[0]).toLowerCase() !== targetChainHex) setNotice("Please switch to BNB Smart Chain to continue."); };
     provider?.on?.("accountsChanged", accountsChanged);
     provider?.on?.("chainChanged", chainChanged);
-    if (provider && !autoConnectAttempted.current) { autoConnectAttempted.current = true; provider.request({ method: "eth_requestAccounts" }).catch(() => undefined); }
-    return () => { window.removeEventListener("eip6963:announceProvider", announced); provider?.removeListener?.("accountsChanged", accountsChanged); provider?.removeListener?.("chainChanged", chainChanged); };
+    const autoConnect = async () => {
+      try {
+        const accounts = await provider.request({ method: "eth_accounts" });
+        if (!Array.isArray(accounts) || typeof accounts[0] !== "string" || !accounts[0]) return;
+        await switchToBnb(provider);
+        const connectedAccounts = await provider.request({ method: "eth_accounts" });
+        if (Array.isArray(connectedAccounts) && typeof connectedAccounts[0] === "string") {
+          setWalletAddress(connectedAccounts[0]);
+          setNotice("");
+        }
+      } catch (error) {
+        setNotice(error instanceof Error ? error.message : "Unable to connect to the wallet.");
+      }
+    };
+    void autoConnect();
+    return () => {
+      provider.removeListener?.("accountsChanged", accountsChanged);
+      provider.removeListener?.("chainChanged", chainChanged);
+    };
   }, [walletProvider]);
 
   useEffect(() => {
