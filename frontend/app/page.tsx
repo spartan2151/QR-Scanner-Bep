@@ -183,7 +183,7 @@ export default function Home() {
       await provider.request({ method: "wallet_addEthereumChain", params: [{ chainId: targetChainHex, chainName: isTestnet ? "BNB Smart Chain Testnet" : "BNB Smart Chain", nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 }, rpcUrls: [isTestnet ? "https://data-seed-prebsc-1-s1.bnbchain.org:8545" : "https://bsc-dataseed.bnbchain.org"], blockExplorerUrls: [isTestnet ? "https://testnet.bscscan.com" : "https://bscscan.com"] }] });
       await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: targetChainHex }] });
     }
-    if (String(await provider.request({ method: "eth_chainId" })).toLowerCase() !== targetChainHex) throw new Error("Could not connect wallet. Please try again.");
+    if (String(await provider.request({ method: "eth_chainId" })).toLowerCase() !== targetChainHex) throw new Error("Wallet network request was not completed.");
   }
 
   async function confirmSend() {
