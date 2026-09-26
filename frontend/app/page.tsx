@@ -88,9 +88,7 @@ export default function Home() {
       setWalletAddress(address);
       setNotice(address ? "" : "Wallet disconnected. Connect again to continue.");
     };
-    const chainChanged = (...args: unknown[]) => {
-      setNotice(String(args[0]).toLowerCase() === targetChainHex ? "" : "Please switch to BNB Smart Chain to continue.");
-    };
+    const chainChanged = () => setNotice("");
     provider?.on?.("accountsChanged", accountsChanged);
     provider?.on?.("chainChanged", chainChanged);
     const autoConnect = async () => {
@@ -185,7 +183,7 @@ export default function Home() {
       await provider.request({ method: "wallet_addEthereumChain", params: [{ chainId: targetChainHex, chainName: isTestnet ? "BNB Smart Chain Testnet" : "BNB Smart Chain", nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 }, rpcUrls: [isTestnet ? "https://data-seed-prebsc-1-s1.bnbchain.org:8545" : "https://bsc-dataseed.bnbchain.org"], blockExplorerUrls: [isTestnet ? "https://testnet.bscscan.com" : "https://bscscan.com"] }] });
       await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: targetChainHex }] });
     }
-    if (String(await provider.request({ method: "eth_chainId" })).toLowerCase() !== targetChainHex) throw new Error("Please switch to BNB Smart Chain to continue.");
+    if (String(await provider.request({ method: "eth_chainId" })).toLowerCase() !== targetChainHex) throw new Error("Wallet did not switch to BNB Smart Chain.");
   }
 
   async function confirmSend() {
