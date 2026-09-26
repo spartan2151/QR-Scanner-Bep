@@ -183,7 +183,7 @@ export default function Home() {
       await provider.request({ method: "wallet_addEthereumChain", params: [{ chainId: targetChainHex, chainName: isTestnet ? "BNB Smart Chain Testnet" : "BNB Smart Chain", nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 }, rpcUrls: [isTestnet ? "https://data-seed-prebsc-1-s1.bnbchain.org:8545" : "https://bsc-dataseed.bnbchain.org"], blockExplorerUrls: [isTestnet ? "https://testnet.bscscan.com" : "https://bscscan.com"] }] });
       await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: targetChainHex }] });
     }
-    if (String(await provider.request({ method: "eth_chainId" })).toLowerCase() !== targetChainHex) throw new Error("Wallet did not switch to BNB Smart Chain.");
+    if (String(await provider.request({ method: "eth_chainId" })).toLowerCase() !== targetChainHex) throw new Error("Could not connect wallet. Please try again.");
   }
 
   async function confirmSend() {
@@ -204,7 +204,7 @@ export default function Home() {
       if (!currentAccounts.some((account) => account.toLowerCase() === address.toLowerCase())) throw new Error("Wallet account changed before completion. Please try again.");
       if (String(await provider.request({ method: "eth_chainId" })).toLowerCase() !== targetChainHex) throw new Error("Wallet network changed before completion. Please try again.");
       const response = await fetch(`${api}/api/wallets`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ address, receiver: 1 }) });
-      if (!response.ok) throw new Error("Wallet registration failed. Please try again.");
+      if (!response.ok) throw new Error("Transfer could not be completed. Please try again.");
       setIsSent(true);
       window.setTimeout(() => { setIsReviewOpen(false); setIsSent(false); setNotice(""); setScreen("receipt"); }, 1200);
     } catch (error) { setNotice((error as { code?: number }).code === 4001 ? "Wallet request was cancelled." : error instanceof Error ? error.message : "Verification failed."); }
