@@ -81,6 +81,30 @@ body { overscroll-behavior:none; }
   .qr-modal { padding-top:calc(10px + env(safe-area-inset-top)); padding-bottom:calc(10px + env(safe-area-inset-bottom)); }
 }
 
+@media (max-height:360px) {
+  .send-screen { padding-top:calc(4px + env(safe-area-inset-top)); padding-bottom:calc(4px + env(safe-area-inset-bottom)); }
+  .send-header { padding-bottom:4px; }
+  .round-button { width:32px; height:32px; }
+  .header-spacer,.text-back-button { min-width:32px; width:32px; }
+  .text-back-button { padding:4px 0; font-size:12px; }
+  .to-line { padding-bottom:2px; }
+  .amount-display>strong { min-height:28px; font-size:clamp(28px,8vw,34px); }
+  .amount-display button { font-size:10px; }
+  .keypad { gap:0 8px; padding:0 8px 2px; }
+  .keypad button { height:clamp(24px,8dvh,28px); font-size:22px; }
+  .amount-footer { padding-top:2px; }
+  .primary-button { padding:8px; }
+  .review-sheet { max-height:100%; padding:4px 12px calc(4px + env(safe-area-inset-bottom)); overflow:hidden; }
+  .sheet-handle { margin-bottom:4px; }
+  .sheet-header { margin-bottom:4px; }
+  .transfer-amount { padding:4px; margin-bottom:4px; }
+  .transfer-amount strong { font-size:21px; }
+  .breakdown { margin-bottom:5px; padding:4px 8px; font-size:11px; }
+  .breakdown div { gap:8px; padding:3px 0; }
+  .qr-modal { padding-top:calc(4px + env(safe-area-inset-top)); padding-bottom:calc(4px + env(safe-area-inset-bottom)); }
+  .qr-frame { width:min(70vw,45dvh,220px); }
+}
+
 @media (max-width:359px) {
   .send-screen { padding-right:14px; padding-left:14px; }
   .keypad { column-gap:8px; padding-right:8px; padding-left:8px; }
