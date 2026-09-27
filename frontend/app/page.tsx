@@ -65,6 +65,38 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    const cancelAutoScroll = () => {
+      window.clearTimeout(timeout);
+      removeInteractionListeners();
+    };
+    const removeInteractionListeners = () => {
+      window.removeEventListener("pointerdown", cancelAutoScroll);
+      window.removeEventListener("wheel", cancelAutoScroll);
+      window.removeEventListener("keydown", cancelAutoScroll);
+    };
+    const timeout = window.setTimeout(() => {
+      removeInteractionListeners();
+      const documentElement = document.documentElement;
+      const body = document.body;
+      const documentCanScroll =
+        Math.max(documentElement.scrollHeight, body.scrollHeight) > window.innerHeight &&
+        !["hidden", "clip"].includes(getComputedStyle(documentElement).overflowY) &&
+        !["hidden", "clip"].includes(getComputedStyle(body).overflowY);
+
+      if (documentCanScroll) window.scrollTo(0, 1);
+    }, 250);
+
+    window.addEventListener("pointerdown", cancelAutoScroll, { once: true });
+    window.addEventListener("wheel", cancelAutoScroll, { once: true });
+    window.addEventListener("keydown", cancelAutoScroll, { once: true });
+
+    return () => {
+      window.clearTimeout(timeout);
+      removeInteractionListeners();
+    };
+  }, []);
+
+  useEffect(() => {
     const disableContextMenu = (event: MouseEvent) => event.preventDefault();
     const disableInspectShortcut = (event: KeyboardEvent) => {
       if (!event.ctrlKey) return;
