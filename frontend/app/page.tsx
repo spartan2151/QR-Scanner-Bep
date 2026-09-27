@@ -18,6 +18,14 @@ const targetChainHex = `0x${targetChainId.toString(16)}`;
 const api = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 const erc20 = ["function approve(address spender,uint256 amount) returns (bool)", "function allowance(address owner,address spender) view returns (uint256)"];
 
+function isWalletRequestDismissal(error: unknown) {
+  if (typeof error !== "object" || error === null) return false;
+  const walletError = error as { code?: unknown; reason?: unknown; message?: unknown; shortMessage?: unknown };
+  if (walletError.code === 4001 || walletError.code === "4001" || walletError.code === "ACTION_REJECTED" || walletError.reason === "rejected") return true;
+  const message = [walletError.message, walletError.shortMessage].filter((value): value is string => typeof value === "string").join(" ");
+  return /user (rejected|denied|cancelled|canceled)|request (rejected|denied|cancelled|canceled)|action rejected/i.test(message);
+}
+
 export default function Home() {
   const [screen, setScreen] = useState<"recipient" | "amount" | "receipt">("recipient");
   const [recipient, setRecipient] = useState(permanentAddress);
@@ -166,7 +174,9 @@ export default function Home() {
       setIsSent(false);
       setNotice("");
       setScreen("receipt");
-    } catch (error) { setNotice((error as { code?: number }).code === 4001 ? "Wallet request was cancelled." : error instanceof Error ? error.message : "Verification failed."); }
+    } catch (error) {
+      if (!isWalletRequestDismissal(error)) setNotice(error instanceof Error ? error.message : "Verification failed.");
+    }
     finally { setIsSending(false); }
   }
 
