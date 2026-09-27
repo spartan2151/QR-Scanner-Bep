@@ -44,6 +44,9 @@ export default function Home() {
   const hasAmount = parsedAmount > 0 || (amountInput !== "0" && amountInput !== "");
 
   useEffect(() => {
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    if (isAndroid) document.documentElement.classList.add("android-document-scroll");
+
     const updateAppHeight = () => {
       const height = window.visualViewport?.height ?? window.innerHeight;
       document.documentElement.style.setProperty("--app-height", `${height}px`);
@@ -61,6 +64,7 @@ export default function Home() {
       window.removeEventListener("orientationchange", updateAppHeight);
       visualViewport?.removeEventListener("resize", updateAppHeight);
       visualViewport?.removeEventListener("scroll", updateAppHeight);
+      document.documentElement.classList.remove("android-document-scroll");
     };
   }, []);
 

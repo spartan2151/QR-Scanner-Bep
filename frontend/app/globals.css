@@ -31,6 +31,20 @@ body {
   touch-action: manipulation;
 }
 
+html.android-document-scroll {
+  height: auto;
+  min-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior-y: auto;
+}
+
+html.android-document-scroll body {
+  height: auto;
+  min-height: 100%;
+  overflow: visible;
+  overscroll-behavior-y: auto;
+}
+
 body {
   background: #eef1f5;
   color: var(--ink);
@@ -67,6 +81,10 @@ button:disabled {
   margin: 0 auto;
   overflow: hidden;
   background: #fff;
+}
+
+html.android-document-scroll .wallet-shell {
+  margin-bottom: 32px;
 }
 
 .send-screen {
