@@ -9,6 +9,7 @@ button,textarea { font:inherit; } button { border:0; cursor:pointer; } button:di
 .recipient-screen { justify-content:space-between; } .amount-screen { overflow:hidden; }
 .send-header,.card-actions,.balance-row,.sheet-header,.asset,.network-pill,.address-book { display:flex; align-items:center; }
 .send-header { justify-content:space-between; padding-bottom:20px; } .send-header h1 { margin:0; font-size:17px; font-weight:700; }
+.text-back-button { min-width:44px; padding:8px 0; background:none; color:var(--muted); font-size:13px; font-weight:700; text-align:left; }
 .round-button { width:44px; height:44px; padding:0; border-radius:50%; background:var(--soft); color:var(--ink); display:grid; place-items:center; }
 .round-button svg { width:19px; height:19px; stroke-width:2.5; } .round-button.small { width:32px; height:32px; } .header-spacer { width:44px; }
 .recipient-content,.amount-content { flex:1; }
