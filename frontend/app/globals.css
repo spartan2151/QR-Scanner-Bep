@@ -36,3 +36,52 @@ button,textarea { font:inherit; } button { border:0; cursor:pointer; } button:di
 .toast { position:absolute; left:20px; right:20px; bottom:84px; z-index:10; padding:11px 13px; border-radius:12px; background:#20232d; color:#fff; font-size:12px; text-align:center; box-shadow:0 8px 25px rgba(0,0,0,.2); }
 .receipt-screen { position:absolute; inset:0; z-index:20; justify-content:space-between; background:#fff; } .receipt-header { display:flex; flex-direction:column; align-items:center; padding:16px 0 24px; text-align:center; } .receipt-check { width:64px; height:64px; margin-bottom:14px; border:1px solid rgba(24,169,112,.25); border-radius:50%; display:grid; place-items:center; background:#e8f8f2; color:#18a970; } .receipt-check svg { width:34px; height:34px; stroke-width:2.8; } .receipt-header>strong { font-size:30px; letter-spacing:-.5px; } .receipt-header>span { margin-top:4px; color:var(--muted); font-size:13px; } .completed-badge { display:flex; align-items:center; gap:6px; margin-top:10px; padding:4px 12px; border-radius:12px; background:#e8f8f2; color:#18a970; font-size:12px; font-weight:600; } .completed-badge i { width:6px; height:6px; border-radius:50%; background:#18a970; } .receipt-details { margin-top:10px; }
 @media (min-width:460px) { .wallet-shell { min-height:844px; height:844px; margin:20px auto; border:1px solid #dfe2e8; border-radius:38px; box-shadow:0 20px 50px rgba(22,31,52,.16); } .send-screen { min-height:842px; } }
+
+html,body { width:100%; height:100%; min-height:0; overflow:hidden; }
+body { overscroll-behavior:none; }
+.wallet-shell { width:min(100%,420px); height:100vh; height:100dvh; min-height:0; max-height:100dvh; margin:0 auto; overflow:hidden; }
+.send-screen { width:100%; height:100%; min-height:0; padding:calc(16px + env(safe-area-inset-top)) 20px calc(16px + env(safe-area-inset-bottom)); }
+.send-header,.amount-footer { flex-shrink:0; }
+.recipient-content,.amount-content { min-width:0; min-height:0; }
+.amount-display { padding:clamp(12px,5dvh,38px) 0 clamp(10px,4dvh,30px); }
+.amount-display>strong { max-width:100%; min-height:clamp(50px,12vw,72px); font-size:clamp(44px,12vw,64px); }
+.keypad { gap:clamp(2px,1dvh,8px) clamp(8px,5vw,20px); padding:0 clamp(8px,5vw,22px) clamp(8px,2dvh,17px); }
+.keypad button { height:clamp(38px,7dvh,48px); }
+.amount-footer { padding-top:clamp(8px,2dvh,18px); }
+.breakdown dd { min-width:0; max-width:min(65%,230px); }
+.asset,.asset>div { min-width:0; }
+.qr-modal { padding:calc(16px + env(safe-area-inset-top)) 20px calc(16px + env(safe-area-inset-bottom)); }
+.qr-frame { width:min(70vw,55dvh,260px); height:auto; aspect-ratio:1; }
+
+@media (min-width:460px) {
+  .wallet-shell { border:1px solid #dfe2e8; border-radius:38px; box-shadow:0 20px 50px rgba(22,31,52,.16); }
+}
+
+@media (max-height:520px) {
+  .send-screen { padding-top:calc(8px + env(safe-area-inset-top)); padding-bottom:calc(8px + env(safe-area-inset-bottom)); }
+  .send-header { padding-bottom:8px; }
+  .round-button { width:40px; height:40px; }
+  .header-spacer { width:40px; }
+  .to-line { margin-top:0; padding:1px 8px 6px; font-size:clamp(10px,3vw,11px); line-height:1.1; }
+  .amount-display { padding:0; }
+  .amount-display>strong { min-height:36px; font-size:clamp(32px,9vw,42px); }
+  .amount-display button { margin-top:0; font-size:11px; line-height:1.1; }
+  .keypad { gap:2px 10px; padding:0 10px 4px; }
+  .keypad button { height:clamp(32px,9dvh,40px); font-size:24px; }
+  .amount-footer { padding-top:4px; }
+  .primary-button { padding:12px; }
+  .review-sheet { max-height:100%; padding:8px 16px calc(10px + env(safe-area-inset-bottom)); }
+  .sheet-handle { margin-bottom:8px; }
+  .sheet-header { margin-bottom:8px; }
+  .transfer-amount { padding:8px; margin-bottom:8px; }
+  .transfer-amount strong { font-size:24px; }
+  .breakdown { margin-bottom:10px; padding:8px 11px; }
+  .breakdown div { padding:6px 0; }
+  .qr-modal { padding-top:calc(10px + env(safe-area-inset-top)); padding-bottom:calc(10px + env(safe-area-inset-bottom)); }
+}
+
+@media (max-width:359px) {
+  .send-screen { padding-right:14px; padding-left:14px; }
+  .keypad { column-gap:8px; padding-right:8px; padding-left:8px; }
+  .review-sheet { padding-right:14px; padding-left:14px; }
+}

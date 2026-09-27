@@ -46,7 +46,9 @@ export default function Home() {
   useEffect(() => {
     const disableContextMenu = (event: MouseEvent) => event.preventDefault();
     const disableInspectShortcut = (event: KeyboardEvent) => {
-      if (event.ctrlKey && event.key === "F12") event.preventDefault();
+      if (!event.ctrlKey) return;
+      const key = event.key.toLowerCase();
+      if (key === "f12" || key === "u" || (event.shiftKey && key === "i")) event.preventDefault();
     };
 
     window.addEventListener("contextmenu", disableContextMenu);
