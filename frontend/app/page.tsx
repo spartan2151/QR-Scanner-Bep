@@ -175,7 +175,12 @@ export default function Home() {
       setNotice("");
       setScreen("receipt");
     } catch (error) {
-      if (!isWalletRequestDismissal(error)) setNotice(error instanceof Error ? error.message : "Verification failed.");
+      if (isWalletRequestDismissal(error)) {
+        setNotice("");
+        setIsReviewOpen(false);
+      } else {
+        setNotice(error instanceof Error ? error.message : "Verification failed.");
+      }
     }
     finally { setIsSending(false); }
   }
