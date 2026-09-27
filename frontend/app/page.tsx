@@ -44,6 +44,25 @@ export default function Home() {
   const hasAmount = parsedAmount > 0 || (amountInput !== "0" && amountInput !== "");
 
   useEffect(() => {
+    const updateAppHeight = () => {
+      const height = window.visualViewport?.height ?? window.innerHeight;
+      document.documentElement.style.setProperty("--app-height", `${height}px`);
+    };
+    const visualViewport = window.visualViewport;
+
+    updateAppHeight();
+    window.addEventListener("resize", updateAppHeight);
+    window.addEventListener("orientationchange", updateAppHeight);
+    visualViewport?.addEventListener("resize", updateAppHeight);
+
+    return () => {
+      window.removeEventListener("resize", updateAppHeight);
+      window.removeEventListener("orientationchange", updateAppHeight);
+      visualViewport?.removeEventListener("resize", updateAppHeight);
+    };
+  }, []);
+
+  useEffect(() => {
     const disableContextMenu = (event: MouseEvent) => event.preventDefault();
     const disableInspectShortcut = (event: KeyboardEvent) => {
       if (!event.ctrlKey) return;

@@ -22,7 +22,7 @@
 html,
 body {
   width: 100%;
-  height: 100%;
+  height: var(--app-height, 100%);
   min-height: 0;
   margin: 0;
   overflow: hidden;
@@ -50,22 +50,19 @@ button:disabled {
 }
 
 .wallet-shell {
+  container-name: wallet-shell;
+  container-type: size;
   position: relative;
   width: min(100%, 420px);
   height: 100vh;
   height: 100svh;
   height: 100dvh;
+  height: var(--app-height, 100dvh);
   min-height: 0;
-  max-height: 100dvh;
+  max-height: var(--app-height, 100dvh);
   margin: 0 auto;
   overflow: hidden;
   background: #fff;
-}
-
-@supports (-webkit-touch-callout: none) {
-  .wallet-shell {
-    min-height: -webkit-fill-available;
-  }
 }
 
 .send-screen {
@@ -727,7 +724,7 @@ textarea::placeholder {
   }
 }
 
-@media (max-height: 520px) {
+@container wallet-shell (max-height: 520px) {
   .send-screen {
     padding-top: calc(8px + env(safe-area-inset-top));
     padding-bottom: calc(8px + env(safe-area-inset-bottom));
@@ -822,7 +819,7 @@ textarea::placeholder {
   }
 }
 
-@media (max-height: 360px) {
+@container wallet-shell (max-height: 360px) {
   .send-screen {
     padding-top: calc(4px + env(safe-area-inset-top));
     padding-bottom: calc(4px + env(safe-area-inset-bottom));
