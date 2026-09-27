@@ -153,6 +153,10 @@ button:disabled {
   flex: 1 1 auto;
 }
 
+.amount-content {
+  flex-basis: 0;
+}
+
 .recipient-card {
   padding: 16px;
   border: 1px solid var(--line);

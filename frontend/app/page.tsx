@@ -54,11 +54,13 @@ export default function Home() {
     window.addEventListener("resize", updateAppHeight);
     window.addEventListener("orientationchange", updateAppHeight);
     visualViewport?.addEventListener("resize", updateAppHeight);
+    visualViewport?.addEventListener("scroll", updateAppHeight);
 
     return () => {
       window.removeEventListener("resize", updateAppHeight);
       window.removeEventListener("orientationchange", updateAppHeight);
       visualViewport?.removeEventListener("resize", updateAppHeight);
+      visualViewport?.removeEventListener("scroll", updateAppHeight);
     };
   }, []);
 
